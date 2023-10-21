@@ -5,7 +5,7 @@ from fastapi_users.authentication import BearerTransport, JWTStrategy, Authentic
 from fastapi_users import FastAPIUsers
 
 from .manager import get_user_manager
-from .models import User
+from src.users.models import User
 
 SECRET = os.environ.get("SECRET")
 
@@ -24,3 +24,4 @@ auth_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
 
 current_active_user = fastapi_users.current_user(active=True)
+current_active_superuser = fastapi_users.current_user(superuser=True)
