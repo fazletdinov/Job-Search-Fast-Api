@@ -23,15 +23,19 @@ async def authenticated_route(user: User = Depends(current_active_user)):
 
 @resume_router.post("/", response_model=ResumeRead)
 async def add_resume(body: Annotated[ResumeCreate, Body()],
-                     user: User = Depends(current_active_user)) -> ResumeRead:
+                     user: Annotated[User, Depends(current_active_user)],
+                     db: Annotated[ResumeCreate, Depends(get_async_session)]) -> ResumeRead:
     resume_dict: dict = body.model_dump(exclude_none=True)
-    return await CrudResume._create_resume(resume_dict, user)
+    return await CrudResume._create_resume(resume_dict, user, db)
 
 
 @resume_router.get("/{resume_id}", response_model=ResumeRead | None)
 async def get_resume_by_id(resume_id: Annotated[int, Path(gt=0)],
                            db: Annotated[AsyncSession, Depends(get_async_session)]) -> ResumeRead | None:
-    return await CrudResume._get_resume_by_id(resume_id, db)
+    resume = await CrudResume._get_resume_by_id(resume_id, db)
+    if resume is None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail=f"Резюме с id = {resume_id} не существует")
 
 
 @resume_router.get("/", response_model=LimitOffsetPage[ResumeRead])
@@ -43,15 +47,20 @@ async def get_list_resume(resume_filter: Annotated[ResumeFilter, FilterDepends(R
 @resume_router.patch("/{resume_id}", response_model=ResumeRead)
 async def update_resume(resume_id: Annotated[int, Path(gt=0)],
                         body: ResumeUpdate,
-                        user: Annotated[User, Depends(current_active_user)]) -> ResumeRead:
+                        user: Annotated[User, Depends(current_active_user)],
+                        db: Annotated[AsyncSession, Depends(get_async_session)]) -> ResumeRead:
     model_dump = body.model_dump(exclude_none=True)
     if model_dump is None:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                            detail="Нужно заполнять хотбяы одно поля для обновления")
-    return await CrudResume._update_resume(resume_id, user, model_dump)
+                            detail="Нужно заполнять хотябы одно поля для обновления")
+    return await CrudResume._update_resume(resume_id, user, model_dump, db)
 
 
 @resume_router.delete("/{resume_id}")
 async def delete_resume(resume_id: Annotated[int, Path(gt=0)],
-                        user: Annotated[User, Depends(current_active_user)]) -> int:
-    return await CrudResume._delete_resume(resume_id, user)
+                        user: Annotated[User, Depends(current_active_user)],
+                        db: Annotated[AsyncSession, Depends(get_async_session)]) -> int:
+    resume_id = await CrudResume._delete_resume(resume_id, user, db)
+    if resume_id is None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail=f"Резюме с id = {resume_id} не существует")
