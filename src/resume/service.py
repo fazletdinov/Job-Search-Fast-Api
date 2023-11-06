@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.users.models import User
+from database.models import User
 from .schema import ResumeRead
 from .dals import ResumeDal
 from database.session import engine

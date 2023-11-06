@@ -6,7 +6,7 @@ from fastapi_pagination import LimitOffsetPage
 from fastapi_filter import FilterDepends
 
 from .schema import ResumeCreate, ResumeRead, ResumeUpdate
-from src.users.models import User
+from database.models import User
 from src.users.router import users_roter
 from src.auth.config import current_active_user
 from database.session import get_async_session, engine

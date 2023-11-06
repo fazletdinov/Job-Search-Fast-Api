@@ -50,7 +50,7 @@ python3 main
 }
 ```
 
-### Метод yужен для получения токена
+### Метод нужен для получения токена
 ### Пример запроса
 `POST /auth/jwt/login`
 
@@ -59,6 +59,7 @@ python3 main
   "username": "user@example.com",
   "password": "string"
 }
+```
 
 ### Ответ
 ```json
@@ -129,6 +130,6 @@ python3 main
 `PATCH /resume/{resume_id}` - Обнговление резюме, могут лишь авторизованные пользователи и лишь свою, админы могут коректировать любые
 `DELETE /resume/{resume_id}` - Удаление резюме, могут лишь авторизованные пользователи и лишь свою,
 админы могут удалять любые
-```
+
 ### Автор
 [Idel Fazletdinov - fazletdinov](https://github.com/fazletdinov)

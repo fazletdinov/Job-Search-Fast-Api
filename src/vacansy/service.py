@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.users.models import User
+from database.models import User
 from .schema import VacansyReadAfterPost
 from .dals import VacansyDal, CommentDal
 from database.session import engine
@@ -32,6 +32,11 @@ class CrudVacansy:
     async def _delete_vacansy(vacansy_id: int, user: User, session: AsyncSession):
         vacansydal = VacansyDal(session)
         return await vacansydal.delete_vacansy_dal(vacansy_id, user)
+    
+    @staticmethod
+    async def _admin_delete_vacansy(vacansy_id: int, user: User, session: AsyncSession):
+        vacansydal = VacansyDal(session)
+        return await vacansydal.admin_delete_vacansy_dal(vacansy_id, user)
 
     @staticmethod
     async def _get_list_vacansy(vacansy_filter, session: AsyncSession):
@@ -60,6 +65,12 @@ class CrudComment:
     async def _delete_comment(vacansy_id: int, comment_id: int, user: User, session: AsyncSession):
         commentdal = CommentDal(session)
         comment = await commentdal.delete_comment_dal(vacansy_id, comment_id, user)
+        return comment
+    
+    @staticmethod
+    async def _admin_delete_comment(vacansy_id: int, comment_id: int, user: User, session: AsyncSession):
+        commentdal = CommentDal(session)
+        comment = await commentdal.admin_delete_comment_dal(vacansy_id, comment_id, user)
         return comment
 
     @staticmethod

@@ -5,20 +5,18 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from settings import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
-from src.users.models import Base as users_base
-from src.resume.models import Base as resume_base
-from src.vacansy.models import Base as vacansy_base
+from src.core.config import db_settings
+from database.models import Base 
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 section = config.config_ini_section
-config.set_section_option(section, "DB_HOST", DB_HOST)
-config.set_section_option(section, "DB_PORT", DB_PORT)
-config.set_section_option(section, "DB_USER", DB_USER)
-config.set_section_option(section, "DB_NAME", DB_NAME)
-config.set_section_option(section, "DB_PASS", DB_PASS)
+config.set_section_option(section, "DB_HOST", db_settings.host)
+config.set_section_option(section, "DB_PORT", str(db_settings.port))
+config.set_section_option(section, "DB_USER", db_settings.user)
+config.set_section_option(section, "DB_NAME", db_settings.name)
+config.set_section_option(section, "DB_PASS", db_settings.password.get_secret_value())
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -29,7 +27,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [vacansy_base.metadata]
+target_metadata = [Base.metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

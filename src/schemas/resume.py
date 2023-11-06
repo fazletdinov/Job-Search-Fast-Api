@@ -9,9 +9,10 @@ class ResumeCreate(BaseModel):
     experience: str
     education: str
     about: str | None = Field(max_length=1000, default=None)
+    image: str | None = None
 
 
-class ResumeRead(BaseModel):
+class ResumeResponse(BaseModel):
     id: int
     first_name: str
     last_name: str
@@ -32,4 +33,5 @@ class ResumeUpdate(BaseModel):
     age: int | None = Field(gt=0, lt=120)
     experience: str | None
     education: str | None
-    about: str | None = Field(max_length=1)
+    about: str | None = None
+    image: str | None = None

@@ -7,11 +7,12 @@ from fastapi_filter import FilterDepends
 
 from .schema import (VacansyCreate, VacansyRead, VacansyUpdate, VacansyReadList,
                      CommentCreate, CommentRead, CommentUpdate, VacansyReadAfterPost)
-from src.users.models import User
-from src.auth.config import current_active_user
+from database.models import User
+from src.auth.config import current_active_user, current_active_superuser
 from database.session import get_async_session
 from .service import CrudVacansy, CrudComment
 from .filter import VacansyFilter
+from src.users.permissions import Permission
 
 vacansy_router = APIRouter()
 
@@ -56,10 +57,24 @@ async def update_vacansy(vacansy_id: Annotated[int, Path(gt=0)],
 async def delete_vacansy(vacansy_id: Annotated[int, Path(gt=0)],
                          user: Annotated[User, Depends(current_active_user)],
                          db: Annotated[AsyncSession, Depends(get_async_session)]) -> int:
+    if not Permission.check_user_permission(user):
+        return await CrudVacansy._admin_delete_vacansy(vacansy_id, user, db)
     vacansy_id = await CrudVacansy._delete_vacansy(vacansy_id, user, db)
     if vacansy_id is None:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail=f"Вакансии с id = {vacansy_id} не существует")
+    return vacansy_id
+
+@vacansy_router.delete("/admin/{vacansy_id}", response_model=int)
+async def admin_delete_vacansy(vacansy_id: Annotated[int, Path(gt=0)],
+                         user: Annotated[User, Depends(current_active_superuser)],
+                         db: Annotated[AsyncSession, Depends(get_async_session)]) -> int:
+    
+    vacansy_id = await CrudVacansy._admin_delete_vacansy(vacansy_id, user, db)
+    if vacansy_id is None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail=f"Вакансии с id = {vacansy_id} не существует")
+    return vacansy_id
 
 
 @vacansy_router.post("/{vacansy_id}/comments", response_model=CommentRead)
@@ -82,10 +97,23 @@ async def delete_comment(vacansy_id: Annotated[int, Path(gt=0)],
                          comment_id: Annotated[int, Path(gt=0)],
                          user: Annotated[User, Depends(current_active_user)],
                          db: Annotated[AsyncSession, Depends(get_async_session)]) -> int:
+    if not Permission.check_user_permission(user):
+        return await CrudComment._admin_delete_comment(vacansy_id, comment_id, user, db)
     res = await CrudComment._delete_comment(vacansy_id, comment_id, user, db)
     if res is None:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail="Комментарий или вакансия не существуют")
+
+@vacansy_router.delete("/admin/{vacansy_id}/{comment_id}")
+async def admin_delete_comment(vacansy_id: Annotated[int, Path(gt=0)],
+                         comment_id: Annotated[int, Path(gt=0)],
+                         user: Annotated[User, Depends(current_active_superuser)],
+                         db: Annotated[AsyncSession, Depends(get_async_session)]) -> int:
+    res = await CrudComment._admin_delete_comment(vacansy_id, comment_id, user, db)
+    if res is None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail="Комментарий или вакансия не существуют")
+    return res
 
 
 @vacansy_router.patch("/{vacansy_id}/{comment_id}")
