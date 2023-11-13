@@ -69,12 +69,25 @@ class RoleDAL(CrudBase):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail="Ошибка редактирования Role")
 
-    async def get_by_user_id(self, user_id: UUID) -> Union[list[Role], Exception, None]:
+    async def get_by_user_id_paginate(self, user_id: UUID) -> Union[list[Role], Exception, None]:
         try:
             query = select(Role).join(UserRole, Role.id == UserRole.role_id).\
                 join(User, User.id == UserRole.user_id).\
                 where(UserRole.user_id == user_id)
             roles = await paginate(self.db_session, query)
+            return roles
+        except exc.SQLAlchemyError as error:
+            print(f"Ошибка получения списка Role: {error}")
+        except Exception as error:
+            print(f"Ошибка получения списка Role: {error}")
+
+    async def get_by_user_id(self, user_id: UUID) -> Union[list[Role], Exception, None]:
+        try:
+            query = select(Role).join(UserRole, Role.id == UserRole.role_id).\
+                join(User, User.id == UserRole.user_id).\
+                where(UserRole.user_id == user_id)
+            res = await self.db_session.execute(query)
+            roles = res.fetchall()
             return roles
         except exc.SQLAlchemyError as error:
             print(f"Ошибка получения списка Role: {error}")

@@ -2,9 +2,9 @@ from uuid import UUID
 from typing import Optional
 
 from fastapi import status, HTTPException
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, update, exc, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi_pagination.ext.sqlalchemy import paginate
 
 from database.models import Entry
 from src.crud.base_classes import CrudBase
@@ -19,9 +19,9 @@ class EntryDAL(CrudBase):
         """Create Entry"""
         new_entry = Entry(
             user_id=user_id,
-            user_agent=user_agent
+            user_agent=user_agent,
             refresh_token=refresh_token
-        )
+            )
         try:
             self.db_session.add(new_entry)
             await self.db_session.commit()
@@ -100,7 +100,7 @@ class EntryDAL(CrudBase):
                                 user_agent: str,
                                 only_active: bool = False) -> Optional[Entry]:
         try:
-            query = select(Entry).where(Entry.user_agent == user_agent):
+            query = select(Entry).where(Entry.user_agent == user_agent)
             if only_active:
                 query = query.where(Entry.is_active == True)
             res = await self.db_session.execute(query)
