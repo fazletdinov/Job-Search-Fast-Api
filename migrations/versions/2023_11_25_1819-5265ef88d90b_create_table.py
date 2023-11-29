@@ -1,8 +1,8 @@
-"""create table user, role, resime, hr, vacansy, comment
+"""Create table
 
-Revision ID: c906d128517a
+Revision ID: 5265ef88d90b
 Revises: 
-Create Date: 2023-11-03 21:01:32.440695
+Create Date: 2023-11-25 18:19:32.055928
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'c906d128517a'
+revision: str = '5265ef88d90b'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -35,14 +35,23 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
+    op.create_table('entry',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('user_id', sa.UUID(), nullable=False),
+    sa.Column('user_agent', sa.String(length=100), nullable=True),
+    sa.Column('date_time', sa.DateTime(), nullable=False),
+    sa.Column('refresh_token', sa.String(length=100), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('hr',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('first_name', sa.String(length=250), nullable=False),
-    sa.Column('last_name', sa.String(length=250), nullable=False),
-    sa.Column('middle_name', sa.String(length=250), nullable=False),
-    sa.Column('age', sa.Integer(), nullable=False),
-    sa.Column('company_name', sa.String(length=250), nullable=False),
-    sa.Column('about_the_company', sa.String(length=3000), nullable=True),
+    sa.Column('Имя', sa.String(length=250), nullable=False),
+    sa.Column('Фамилия', sa.String(length=250), nullable=False),
+    sa.Column('Отчество', sa.String(length=250), nullable=False),
+    sa.Column('Возраст', sa.Integer(), nullable=False),
+    sa.Column('Название компании', sa.String(length=250), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.Column('created', sa.DateTime(timezone=True), nullable=True),
     sa.Column('user_id', sa.UUID(), nullable=False),
@@ -51,13 +60,14 @@ def upgrade() -> None:
     )
     op.create_table('resume',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('first_name', sa.String(length=250), nullable=False),
-    sa.Column('last_name', sa.String(length=250), nullable=False),
-    sa.Column('middle_name', sa.String(length=250), nullable=False),
-    sa.Column('age', sa.Integer(), nullable=False),
-    sa.Column('experience', sa.String(length=250), nullable=False),
-    sa.Column('education', sa.String(length=250), nullable=False),
-    sa.Column('about', sa.String(length=3000), nullable=True),
+    sa.Column('Имя', sa.String(length=250), nullable=False),
+    sa.Column('Фамилия', sa.String(length=250), nullable=False),
+    sa.Column('Отчество', sa.String(length=250), nullable=False),
+    sa.Column('Возраст', sa.Integer(), nullable=False),
+    sa.Column('Опыт работы', sa.String(length=250), nullable=False),
+    sa.Column('Образование', sa.String(length=250), nullable=False),
+    sa.Column('О себе', sa.String(length=3000), nullable=True),
+    sa.Column('Изображение', sa.String(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.Column('created', sa.DateTime(timezone=True), nullable=True),
     sa.Column('user_id', sa.UUID(), nullable=False),
@@ -74,13 +84,13 @@ def upgrade() -> None:
     )
     op.create_table('vacansy',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('place_of_work', sa.String(length=250), nullable=False),
-    sa.Column('required_specialt', sa.String(length=500), nullable=False),
-    sa.Column('proposed_salary', sa.String(length=120), nullable=False),
-    sa.Column('working_conditions', sa.String(length=250), nullable=False),
-    sa.Column('required_experience', sa.String(length=250), nullable=False),
-    sa.Column('vacant', sa.String(length=20), nullable=True),
-    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.Column('Место работы', sa.String(length=250), nullable=False),
+    sa.Column('О компании', sa.String(length=3000), nullable=True),
+    sa.Column('Треубемая специальность', sa.String(length=500), nullable=False),
+    sa.Column('Заработная плата', sa.String(length=120), nullable=False),
+    sa.Column('Рабочие условия', sa.String(length=250), nullable=False),
+    sa.Column('Требуемый опыт', sa.String(length=250), nullable=False),
+    sa.Column('Активна', sa.Boolean(), nullable=True),
     sa.Column('created', sa.DateTime(timezone=True), nullable=True),
     sa.Column('hr_id', sa.UUID(), nullable=False),
     sa.ForeignKeyConstraint(['hr_id'], ['hr.id'], onupdate='CASCADE', ondelete='CASCADE'),
@@ -106,6 +116,7 @@ def downgrade() -> None:
     op.drop_table('user_role')
     op.drop_table('resume')
     op.drop_table('hr')
+    op.drop_table('entry')
     op.drop_table('user')
     op.drop_table('role')
     # ### end Alembic commands ###

@@ -21,6 +21,7 @@ services:
 
   redis_token:
     image: redis:7.2-rc2
+    container_name: redis
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
@@ -29,4 +30,16 @@ services:
       - .env
     ports:
       - 6379:6379
+
+  # app:
+  #   build: .
+  #   container_name: app
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - redis_token
+  #     - db
+  #   ports:
+  #     - 8000:8000
+
 

@@ -16,6 +16,7 @@ def _pwd_validator(value: str) -> str:
     if value.isdigit() or value.isalpha():
         raise ValueError(
             "пароль должен содержать буквы, цифры и специальные символы")
+    return value
 
 
 class UserCreate(BaseModel):

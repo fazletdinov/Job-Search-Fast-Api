@@ -1,14 +1,11 @@
 import uuid
 from datetime import datetime
 
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import String, DateTime, Column, Boolean, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 
-from database.session import Base, get_async_session
-from src.users.service import SQLAlchemyUserDatabaseCustom
+from database.session import Base
 
 
 class User(Base):
@@ -125,7 +122,7 @@ class Resume(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey(User.id,
                                                     ondelete="CASCADE",
                                                     onupdate="CASCADE"), nullable=False)
-    user = relationship("User", back_populates="resume")
+    user = relationship("User", back_populates="resumes")
 
     def __repr__(self) -> str:
         return f"Resume: {self.first_name} - {self.last_name}"
@@ -179,6 +176,3 @@ class Comment(Base):
     def __repr__(self) -> str:
         return f"Comment: {self.id}"
 
-
-async def get_user_db(session: AsyncSession = Depends(get_async_session)):
-    yield SQLAlchemyUserDatabaseCustom(session, User)

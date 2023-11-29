@@ -2,6 +2,7 @@ from abc import ABC, abstractclassmethod
 from typing import Any
 from uuid import UUID
 
+
 class CrudBase(ABC):
 
     @abstractclassmethod

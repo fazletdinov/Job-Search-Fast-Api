@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
 
 
-class RoleResponse(BaseModel):
+class ResponseRole(BaseModel):
     id: UUID
     name: str
 
@@ -19,12 +19,12 @@ class RequestNewRoleToUser(BaseModel):
     role_id: UUID = Field()
 
 
-class UUIDMixIn(BaseModel):
-    id: UUID = Field(..., alias="uuid")
+# class UUIDMixIn(BaseModel):
+#     id: UUID = Field(..., alias="uuid")
 
-    class Config:
-        allow_population_by_field_name = True
+#     class Config:
+#         allow_population_by_field_name = True
 
 
-class ResponseRole(UUIDMixIn):
-    name: str = Field()
+# class ResponseRole(UUIDMixIn):
+#     name: str = Field()
