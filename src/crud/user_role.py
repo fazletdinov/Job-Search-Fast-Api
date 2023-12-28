@@ -1,13 +1,12 @@
 from uuid import UUID
 from typing import Union
-import logging
 import logging.config
 
 from fastapi import status, HTTPException
 from sqlalchemy import select, update, exc
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import UserRole
+from src.database.models import UserRole
 from src.crud.base_classes import CrudBase
 from src.core.log_config import LOGGING
 

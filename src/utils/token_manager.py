@@ -7,9 +7,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 from pydantic import ValidationError
 
-from src.core.config import token_settings
+from src.core.config import settings
 from src.schemas import token as token_schema
-from database.token import TokenDBBase, get_token_db
+from src.database.token import TokenDBBase, get_token_db
 
 
 async def _verify_token(token: str, token_db: TokenDBBase, type: token_schema.TokenType) -> str:
@@ -22,16 +22,16 @@ async def _verify_token(token: str, token_db: TokenDBBase, type: token_schema.To
 
     try:
         if type == token_schema.TokenType.access.value:
-            secret_key = token_settings.access_secret_key
+            secret_key = settings.token.access_secret_key
             payload_model = token_schema.AccessTokenPayload
         else:
-            secret_key = token_settings.refresh_secret_key
+            secret_key = settings.token.refresh_secret_key
             payload_model = token_schema.AccessTokenPayload
 
         payload = jwt.decode(
             token,
             secret_key.get_secret_value(),
-            algorithms=[token_settings.algorithm],
+            algorithms=[settings.token.algorithm],
             options={"verify_exp": False, },
         )
 

@@ -1,8 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 from functools import lru_cache
-from typing import List, Optional
-import logging
+from typing import Optional
 import logging.config
 
 from fastapi import status, HTTPException, Depends
@@ -11,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.role import RoleDAL
 from src.crud.user_role import UserRoleDAL
 from src.crud.user import UserDAL
-from database.session import get_async_session
+from src.database.session import db_helper
 from src.schemas.role import ResponseRole
 from src.core.log_config import LOGGING
 
@@ -211,7 +210,7 @@ class RoleService(RoleServiceBase):
 
 
 @lru_cache
-def get_role_service(db_session: AsyncSession = Depends(get_async_session)) -> RoleService:
-    log_msg = f'{db_session=}, {get_async_session=}'
+def get_role_service(db_session: AsyncSession = Depends(db_helper.get_async_session)) -> RoleService:
+    log_msg = f'{db_session=}'
     log.debug(log_msg)
     return RoleService(db_session=db_session)

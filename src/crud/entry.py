@@ -1,6 +1,5 @@
 from uuid import UUID
 from typing import Optional
-import logging
 import logging.config
 
 from fastapi import status, HTTPException
@@ -8,7 +7,7 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, update, exc, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import Entry
+from src.database.models import Entry
 from src.crud.base_classes import CrudBase
 from src.core.log_config import LOGGING
 

@@ -1,13 +1,12 @@
 from uuid import UUID
 from typing import Union
-import logging
 import logging.config
 
 from fastapi import status, HTTPException
 from sqlalchemy import select, update, exc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import Comment
+from src.database.models import Comment
 from src.crud.base_classes import CrudBase
 from src.core.log_config import LOGGING
 
@@ -45,7 +44,7 @@ class CommentDAL(CrudBase):
         log_message = f'CRUD Получение Comment: vacansy_id={vacansy_id}'
         log.debug(log_message)
         try:
-            query = select(Comment.id, Comment.text, Comment.created).where(
+            query = select(Comment.id, Comment.text, Comment.created_at).where(
                 Comment.vacansy_id == vacansy_id)
             res = await self.db_session.execute(query)
             comment_rows = res.fetchall()
@@ -100,7 +99,8 @@ class CommentDAL(CrudBase):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail="Неизвестная ошибка при удалении админом Comment")
 
-    async def update(self, vacansy_id: UUID, comment_id: UUID, comment: dict, user_id: UUID) -> Union[UUID, None, Exception]:
+    async def update(self, vacansy_id: UUID, comment_id: UUID, comment: dict, user_id: UUID) -> Union[
+        UUID, None, Exception]:
         log_message = f'CRUD Обновление Comment: vacansy_id={vacansy_id}, comment_id={comment_id}, comment={comment}, user_id={user_id}'
         log.debug(log_message)
         try:

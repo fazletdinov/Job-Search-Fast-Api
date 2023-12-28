@@ -1,5 +1,4 @@
-from abc import ABC, abstractmethod
-import logging
+from abc import ABCMeta, abstractmethod
 import logging.config
 import bcrypt
 from functools import lru_cache
@@ -8,20 +7,21 @@ from fastapi import status, HTTPException, Depends
 from pydantic import SecretStr, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.token import TokenDBBase, get_token_db
-from database.models import User as DBUser, Entry as DBEntry
+from src.database.token import TokenDBBase, get_token_db
+from src.database.models import User as DBUser, Entry as DBEntry
 from src.schemas import user as user_schema
 from src.crud import user as user_dal, role as role_dal, entry as entry_dal
 from src.utils.token_manager import TokenManagerBase, get_token_manager
-from database.session import get_async_session
+from src.database.session import db_helper
 from src.core.log_config import LOGGING
 
 logging.config.dictConfig(LOGGING)
 log = logging.getLogger(__name__)
 
 
-class HashManagerBase(ABC):
+class HashManagerBase(metaclass=ABCMeta):
     """Хэширование и проверка пароля"""
+
     @abstractmethod
     def hash_pwd(self, pwd: str) -> str:
         """Для получения hash пароля"""
@@ -31,8 +31,9 @@ class HashManagerBase(ABC):
         """Проверка соответствия пароля"""
 
 
-class AuthServiceBase(ABC):
+class AuthServiceBase(metaclass=ABCMeta):
     """Service для авторизации пользователя"""
+
     @abstractmethod
     async def register(self, user: user_schema.UserCreate) -> DBUser:
         """Регистрация нового пользовател"""
@@ -66,11 +67,12 @@ class AuthServiceBase(ABC):
         """Изменение пользовательсктх данных"""
 
     @abstractmethod
-    async def update_user_password(self, access_token: str, refresh_token: str, changed_data: user_schema.ChangeUserPassword) -> None:
+    async def update_user_password(self, access_token: str, refresh_token: str,
+                                   changed_data: user_schema.ChangeUserPassword) -> None:
         """Изменение пароля пользователя"""
 
     @abstractmethod
-    async def entry_history(self,  access_token: str, unique: bool) -> list[DBEntry]:
+    async def entry_history(self, access_token: str, unique: bool) -> list[DBEntry]:
         """Получить историю входа пользователя в систему"""
 
     @abstractmethod
@@ -244,7 +246,8 @@ class AuthService(AuthServiceBase, HashManagerBase):
         update_user = await user_crud.get(update_user_id)
         return update_user
 
-    async def update_user_password(self, access_token: str, refresh_token: str, changed_data: user_schema.ChangeUserPassword) -> None:
+    async def update_user_password(self, access_token: str, refresh_token: str,
+                                   changed_data: user_schema.ChangeUserPassword) -> None:
         user_crud = user_dal.UserDAL(self.user_db_session)
         token_data = await self.token_manager.get_data_from_access_token(access_token)
         # проверка старого пороля
@@ -286,7 +289,7 @@ class AuthService(AuthServiceBase, HashManagerBase):
 def get_auth_service(token_db: TokenDBBase = Depends(get_token_db),
                      token_manager: TokenManagerBase = Depends(
                          get_token_manager),
-                     user_db_session: AsyncSession = Depends(get_async_session)):
+                     user_db_session: AsyncSession = Depends(db_helper.get_async_session)):
     log_msg = f'{token_db=}, {token_manager=}, {user_db_session=}'
     log.debug(log_msg)
     return AuthService(token_db, token_manager, user_db_session)

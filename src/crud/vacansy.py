@@ -1,6 +1,5 @@
 from uuid import UUID
 from typing import Union
-import logging
 import logging.config
 
 from fastapi import status, HTTPException
@@ -9,7 +8,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from database.models import Vacansy
+from src.database.models import Vacansy
 from src.crud.base_classes import CrudBase
 from src.utils.filter import VacansyFilter
 from src.core.log_config import LOGGING

@@ -4,7 +4,7 @@ import logging.config
 from fastapi import APIRouter, Depends, Header, Response, Cookie
 from fastapi_pagination import LimitOffsetPage
 
-from src.core.config import token_settings
+from src.core.config import settings
 from src.schemas.user import UserCreate, ChangeUserData, ChangeUserPassword, LoginRequest, UserResponse
 from src.schemas.entry import EntryResponse
 from src.utils.token_manager import verify_refresh_token, verify_access_token
@@ -45,10 +45,10 @@ async def login(user: LoginRequest,
     log.debug(log_msg)
     log.info('Установить refresh token в cookie')
     response.set_cookie(
-        key=token_settings.refresh_token_cookie_name,
+        key=settings.token.refresh_token_cookie_name,
         value=refresh_token,
         httponly=True,
-        expires=token_settings.refresh_expire * 60  # sec
+        expires=settings.toke.refresh_expire * 60  # sec
     )
     return access_token
 
@@ -68,10 +68,10 @@ async def refresh(response: Response,
     new_access_token, new_refresh_token = await auth_service.refresh_tokens(refresh_token,
                                                                             user_agent)
     log.info('Установить refresh token в cookie')
-    response.set_cookie(key=token_settings.refresh_token_cookie_name,
+    response.set_cookie(key=settings.token.refresh_token_cookie_name,
                         value=new_refresh_token,
                         httponly=True,
-                        expires=token_settings.refresh_expire * 60)  # sec
+                        expires=settings.toke.refresh_expire * 60)  # sec
     return new_access_token
 
 
@@ -126,7 +126,7 @@ async def logout(response: Response,
                  ) -> None:
     await auth_service.logout(access_token, refresh_token, user_agent)
     log.debug('Удалить refresh token в cookie')
-    response.delete_cookie(token_settings.refresh_token_cookie_name)
+    response.delete_cookie(settings.token.refresh_token_cookie_name)
 
 
 @auth_router.get("/logout_all",
@@ -138,7 +138,7 @@ async def logout_all(response: Response,
                      auth_service: AuthServiceBase = Depends(get_auth_service)) -> None:
     await auth_service.logout_all(token)
     log.debug('Удалить refresh token в cookie')
-    response.delete_cookie(token_settings.refresh_token_cookie_name)
+    response.delete_cookie(settings.token.refresh_token_cookie_name)
 
 
 @auth_router.post("/change_pwd",
@@ -157,7 +157,7 @@ async def change_pwd(change_pwd_data: ChangeUserPassword,
                                             refresh_token,
                                             ChangeUserPassword(**change_pwd_data.model_dump(exclude_none=True)))
     log.debug('Удалить refresh token в cookie')
-    response.delete_cookie(token_settings.refresh_token_cookie_name)
+    response.delete_cookie(settings.token.refresh_token_cookie_name)
 
 
 @auth_router.post("/change_user_data",
@@ -170,7 +170,8 @@ async def change_user_data(changed_user_data: ChangeUserData,
                            auth_service: AuthServiceBase = Depends(get_auth_service)) -> UserResponse:
     log_msg = f'Изменить данные пользователя: {changed_user_data}'
     log.debug(log_msg)
-    updated_user = await auth_service.update_user_data(access_token, ChangeUserData(**changed_user_data.model_dump(exclude_none=True)))
+    updated_user = await auth_service.update_user_data(access_token, ChangeUserData(
+        **changed_user_data.model_dump(exclude_none=True)))
     return UserResponse.model_validate(updated_user)
 
 
@@ -185,4 +186,4 @@ async def deactivфte_user(response: Response,
     log.debug(log_msg)
     await auth_service.deactivate_user(access_token)
     log.debug('Удалить refresh token в cookie')
-    response.delete_cookie(token_settings.refresh_token_cookie_name)
+    response.delete_cookie(settings.token.refresh_token_cookie_name)

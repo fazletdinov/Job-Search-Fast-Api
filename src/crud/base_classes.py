@@ -1,22 +1,21 @@
-from abc import ABC, abstractclassmethod
+from abc import ABCMeta, abstractmethod
 from typing import Any
-from uuid import UUID
 
 
-class CrudBase(ABC):
+class CrudBase(metaclass=ABCMeta):
 
-    @abstractclassmethod
-    async def create(self, name: str) -> Any:
+    @abstractmethod
+    async def create(self) -> Any:
         """Создание записи в таблице"""
 
-    @abstractclassmethod
-    async def delete(self, id: UUID | str) -> Any:
+    @abstractmethod
+    async def delete(self) -> Any:
         """Удалеие записи в таблице"""
 
-    @abstractclassmethod
-    async def get(self, id: UUID) -> Any:
+    @abstractmethod
+    async def get(self) -> Any:
         """Получение записи из таблицы"""
 
-    @abstractclassmethod
-    async def update(self, id: UUID, **kwargs) -> Any:
+    @abstractmethod
+    async def update(self) -> Any:
         """Редактирование записи в таблице"""

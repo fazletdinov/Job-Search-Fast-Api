@@ -1,6 +1,6 @@
 from fastapi_filter.contrib.sqlalchemy import Filter
 
-from database.models import Vacansy, Resume
+from src.database.models import Vacansy, Resume
 
 
 class VacansyFilter(Filter):
